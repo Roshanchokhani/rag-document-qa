@@ -144,18 +144,31 @@ def main():
     with st.sidebar:
         st.header("⚙️ Configuration")
         
-        # API Token - use environment variable or allow user input
-        api_token = st.session_state.get('api_token', '')
+        # API Token - use Streamlit secrets or environment variable
+        api_token = ""
         
-        if 'HUGGINGFACE_API_TOKEN' in os.environ:
-            api_token = os.environ['HUGGINGFACE_API_TOKEN']
-            st.success("🔑 Using configured API token")
-        else:
-            api_token = st.text_input(
-                "🔑 HuggingFace API Token",
-                type="password",
-                help="Enter your HuggingFace API token. Get one at https://huggingface.co/settings/tokens"
-            )
+        # Try to get token from Streamlit secrets first
+        try:
+            api_token = st.secrets["HUGGINGFACE_API_TOKEN"]
+            st.success("🔑 ✅ API token configured - Ready to use!")
+            st.info("💡 No need to enter token - just ask your questions!")
+        except:
+            # Try environment variable
+            api_token = os.environ.get('HUGGINGFACE_API_TOKEN', '')
+            if api_token:
+                st.success("🔑 ✅ Using environment API token")
+            else:
+                # Fallback to user input
+                st.warning("⚠️ No API token configured")
+                api_token = st.text_input(
+                    "🔑 HuggingFace API Token",
+                    type="password",
+                    help="Enter your HuggingFace API token. Get one at https://huggingface.co/settings/tokens",
+                    placeholder="hf_..."
+                )
+                if not api_token:
+                    st.error("❌ Please enter your HuggingFace API token to use the app")
+                    st.info("👆 Get a free token at: https://huggingface.co/settings/tokens")
         
         st.markdown("---")
         
