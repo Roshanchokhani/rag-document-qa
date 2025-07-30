@@ -2,6 +2,7 @@
 
 import streamlit as st
 import sys
+import os
 sys.path.append('src')
 
 from data_loader import DataLoader
@@ -11,7 +12,6 @@ import requests
 import json
 import time
 from typing import List, Dict, Tuple
-import os
 
 # Page configuration
 st.set_page_config(
@@ -144,12 +144,18 @@ def main():
     with st.sidebar:
         st.header("⚙️ Configuration")
         
-        # API Token input
-        api_token = st.text_input(
-            "🔑 HuggingFace API Token",
-            type="password",
-            help="Enter your HuggingFace API token. Get one at https://huggingface.co/settings/tokens"
-        )
+        # API Token - use environment variable or allow user input
+        api_token = st.session_state.get('api_token', '')
+        
+        if 'HUGGINGFACE_API_TOKEN' in os.environ:
+            api_token = os.environ['HUGGINGFACE_API_TOKEN']
+            st.success("🔑 Using configured API token")
+        else:
+            api_token = st.text_input(
+                "🔑 HuggingFace API Token",
+                type="password",
+                help="Enter your HuggingFace API token. Get one at https://huggingface.co/settings/tokens"
+            )
         
         st.markdown("---")
         
